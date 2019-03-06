@@ -9,23 +9,32 @@ DEBUG_MODE = True
 
 def get_content(url):
 
+	# месяцы для поиска в дате публикации
+
 	months = ('января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', \
 	'сентября', 'октября', 'ноября', 'декабря')
 	
 	text = ''
+	
+	# скачиваем страницу
     		
 	page = requests.get(url)
 	
 	soup = BeautifulSoup(page.text, 'html.parser')
+	
+	# парсим элементы
 
 	title = soup.find('h1').text.strip().replace(u'\xa0', u' ')
 	
 	for a in soup.find_all('p'): text += str(a).strip() + '\n\n' 
+	
+	# парсим дату
 		
 	date = soup.find('time', 'g-date').text.strip().replace(u'\xa0', u' ')
 	
 	for i, j in enumerate(months):
-		if j == 'марта': mon = '%02d' % (i+1)
+
+		if j in date: mon = '%02d' % (i+1)
 	
 	result = re.search('\d{4}',date)
 
@@ -40,9 +49,13 @@ def get_content(url):
 	time = result.group(0).strip()
 		
 	return({'id': url,\
+	
 			'date_pub': year+'-'+mon+'-'+day+' '+time+':00',
+			
 			'date_add': strftime("%Y-%m-%d %H:%M:%S", localtime()),
+			
 			'title': title, 
+			
 			'text': text})
 
 
